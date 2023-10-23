@@ -1,9 +1,10 @@
 package main
 
 func main() {
-	// useHeap()
-	// useLinkedList()
-	// useStack()
-	// useQueue()
+	useHeap()
+	useLinkedList()
+	useStack()
+	useQueue()
 	useBinaryTree()
+	useTrie()
 }
