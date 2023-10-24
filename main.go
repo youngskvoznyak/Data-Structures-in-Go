@@ -7,4 +7,5 @@ func main() {
 	useQueue()
 	useBinaryTree()
 	useTrie()
+	useHashTable()
 }
