@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type Stack struct {
-	items []int
+	items []interface{}
 }
 
 // Push will add a value at the end
@@ -12,7 +12,7 @@ func (s *Stack) Push(i int) {
 }
 
 // Pop will remove a value at the end and return the removed value
-func (s *Stack) Pop() int {
+func (s *Stack) Pop() interface{} {
 	l := len(s.items) - 1
 	toRemove := s.items[l]
 	s.items = s.items[:l]
