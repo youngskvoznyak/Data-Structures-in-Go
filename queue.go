@@ -1,31 +1,57 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 // Queue represents a queue that holds a slice
 type Queue struct {
-	items []int
+	mt          sync.RWMutex
+	collections []interface{}
 }
 
 // Enqueue adds a value at the end
-func (q *Queue) Enqueue(i int) {
-	q.items = append(q.items, i)
+func (q *Queue) Enqueue(value interface{}) {
+	q.mt.Lock()
+	defer q.mt.Unlock()
+	q.collections = append(q.collections, value)
 }
 
 // Dequeue removes a value at the front ans return the removed value
-func (q *Queue) Dequeue() int {
-	toRemove := q.items[0]
-	q.items = q.items[1:]
-	return toRemove
+func (q *Queue) Dequeue() interface{} {
+	q.mt.Lock()
+	defer q.mt.Unlock()
+
+	if q.isEmpty() {
+		return nil
+	}
+
+	val := q.collections[0]
+	q.collections = q.collections[1:]
+
+	return val
+}
+
+func (q *Queue) isEmpty() bool {
+	return q.Count() == 0
+}
+
+func (q *Queue) Count() int {
+	return len(q.collections)
+}
+
+func (q *Queue) Collections() []interface{} {
+	return q.collections
 }
 
 func useQueue() {
-	myQueue := Queue{}
-	fmt.Println(myQueue)
-	myQueue.Enqueue(100)
-	myQueue.Enqueue(200)
-	myQueue.Enqueue(300)
-	fmt.Println(myQueue)
-	myQueue.Dequeue()
-	fmt.Println(myQueue)
+	queue := &Queue{}
+	queue.Enqueue(1)
+	queue.Enqueue(2)
+	queue.Enqueue(3)
+
+	fmt.Println(queue.Collections())
+	queue.Dequeue()
+	fmt.Println(queue.Collections())
 }
