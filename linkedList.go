@@ -2,75 +2,175 @@ package main
 
 import "fmt"
 
+type LinkedList struct {
+	count int
+	head  *node
+	tail  *node
+}
+
 type node struct {
-	data int
-	next *node
+	value interface{}
+	next  *node
 }
 
-type linkedList struct {
-	head   *node
-	length int
-}
-
-func (l *linkedList) prepend(n *node) {
-	second := l.head
-	l.head = n
-	l.head.next = second
-	l.length++
-}
-
-func (l linkedList) printListData() {
-	toPrint := l.head
-	for l.length != 0 {
-		fmt.Printf("%d ", toPrint.data)
-		toPrint = toPrint.next
-		l.length--
+func (l *LinkedList) Add(value interface{}) {
+	newNode := &node{
+		value: value,
+		next:  nil,
 	}
-	fmt.Printf("\n")
+
+	if l.head == nil {
+		l.head = newNode
+		l.tail = newNode
+	} else {
+		l.tail.next = newNode
+		l.tail = newNode
+	}
+
+	l.count++
 }
 
-func (l *linkedList) deleteWithValue(value int) {
-	if l.length == 0 {
-		return
-	}
-	if value == l.head.data {
-		l.head = l.head.next
-		l.length--
-		return
-	}
-	previousToDelete := l.head
-	for previousToDelete.next.data != value {
-		if previousToDelete.next.next == nil {
-			return
+func (l *LinkedList) Remove(element interface{}) (int, bool) {
+	current := l.head
+	var previous *node
+
+	index := 0
+	for current != nil {
+		// find element
+		if current.value == element {
+			// is not first node
+			if previous != nil {
+				previous.next = current.next
+
+				if current.next == nil {
+					l.tail = previous
+				}
+			} else {
+				l.head = current.next
+				//check is empty list
+				if l.head == nil {
+					l.tail = nil
+				}
+			}
+			l.count--
+			return index, true
 		}
-		previousToDelete = previousToDelete.next
+		index++
+		previous = current
+		current = current.next
 	}
-	previousToDelete.next = previousToDelete.next.next
-	l.length--
+	return index, false
+}
+
+func (l *LinkedList) Contains(element interface{}) (int, bool) {
+	current := l.head
+
+	index := 0
+	for current != nil {
+		if current.value == element {
+			return index, true
+		}
+		current = current.next
+		index++
+	}
+	return index, false
+}
+
+func (l *LinkedList) Size() int {
+	return l.count
+}
+
+func (l *LinkedList) PreAdd(value interface{}) {
+	newNode := &node{
+		value: value,
+		next:  nil,
+	}
+	l.head = newNode
+
+	if l.tail == nil {
+		l.tail = newNode
+	}
+	l.count++
+}
+
+func (l *LinkedList) RemoveHead() (bool, *node) {
+	if l.head == nil {
+		return false, nil
+	}
+	tmpHead := l.head
+
+	if l.head.next != nil {
+		l.head = l.head.next
+	} else {
+		l.head = nil
+	}
+	l.count--
+	return true, tmpHead
+}
+
+func (l *LinkedList) RemoveTail() (bool, *node) {
+	tmpTail := l.tail
+
+	if l.head.next == nil {
+		// There is only one node in linked list
+		l.head = nil
+		l.tail = nil
+		l.count--
+		return true, tmpTail
+	}
+	// if there are many nodes in linked list
+	// Rewind to the last node and delete "next" link for the node before the last one
+
+	currentNode := l.head
+	for currentNode.next != nil {
+		if currentNode.next.next == nil {
+			currentNode.next = nil
+		} else {
+			currentNode = currentNode.next
+		}
+	}
+	l.count--
+	l.tail = currentNode
+	return true, tmpTail
+}
+
+func (l *LinkedList) PrintNodes() {
+	currentNode := l.head
+	chain := ""
+
+	for currentNode.next != nil {
+		chain += fmt.Sprintf("| %v : next | --> ", currentNode.value)
+		currentNode = currentNode.next
+	}
+	// last node
+	chain += fmt.Sprintf("| %v : next |", currentNode.value)
+	fmt.Println(chain)
 }
 
 func useLinkedList() {
+	linkedList := &LinkedList{}
+	linkedList.Add(1)
+	linkedList.Add(2)
+	linkedList.Add(3)
+	linkedList.Add(4)
+	linkedList.PrintNodes()
 
-	mylist := linkedList{}
-	node1 := &node{data: 48}
-	node2 := &node{data: 25}
-	node3 := &node{data: 20}
-	node4 := &node{data: 16}
-	node5 := &node{data: 7}
-	node6 := &node{data: 2}
+	if index, removed := linkedList.Remove(3); removed {
+		fmt.Println(fmt.Sprintf("Removed index %d", index))
+		linkedList.PrintNodes()
+	}
 
-	mylist.prepend(node1)
-	mylist.prepend(node2)
-	mylist.prepend(node3)
-	mylist.prepend(node4)
-	mylist.prepend(node5)
-	mylist.prepend(node6)
+	if index, exist := linkedList.Contains(2); exist {
+		fmt.Println(fmt.Sprintf("Exist index %d", index))
+	}
 
-	mylist.printListData()
-	mylist.deleteWithValue(100)
-	mylist.deleteWithValue(2)
-	mylist.printListData()
-	emptyList := linkedList{}
-	emptyList.deleteWithValue(10)
-
+	linkedList.RemoveHead()
+	linkedList.PrintNodes()
+	linkedList.RemoveTail()
+	linkedList.PrintNodes()
+	linkedList.Add(3)
+	linkedList.Add(4)
+	linkedList.PreAdd(1)
+	linkedList.PrintNodes()
+	fmt.Println(linkedList.Size())
 }
